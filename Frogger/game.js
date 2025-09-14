@@ -1,45 +1,53 @@
 // @ts-nocheck — disable TS linting because of gl always throwing errors
 
 const canvas = document.getElementById("gameCanvas");
-
 const scoreDisplay = document.getElementById("score");
 
-gl = WebGLUtils.setupWebGL( canvas );
-    if ( !gl ) { alert( "WebGL isn't available" ); }
+gl = WebGLUtils.setupWebGL(canvas);
+if (!gl) {
+  alert("WebGL isn't available");
+}
 
- //  Load shaders and initialize attribute buffers
-    
-    var program = initShaders( gl, "vertex-shader", "fragment-shader" );
-    gl.useProgram( program );
+//  Load shaders and initialize attribute buffers
+var program = initShaders(gl, "vertex-shader", "fragment-shader");
+gl.useProgram(program);
 
-// 3. Get shader variable locations
+// Get shader variable locations
 const posLoc = gl.getAttribLocation(program, "a_position");
 const resLoc = gl.getUniformLocation(program, "u_resolution");
 const colorLoc = gl.getUniformLocation(program, "u_color");
 
+// Create graphics buffer
 const buffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 
-//  Configure WebGL
+// Configure WebGL window
 gl.viewport(0, 0, canvas.width, canvas.height);
 gl.clearColor(0.9, 0.9, 0.9, 1.0);
 
-// 4. Game variables and state
+// Game constants, variables and states
+const pavementColor = [0.9, 0.9, 0.9, 1.0];
 const frogSize = 35;
+const startingPoint = vec2(canvas.width / 2 - frogSize / 2, canvas.height - 50);
+
+// Frog state
 let frog = {
-  x: canvas.width / 2 - frogSize / 2,
-  y: canvas.height - 50,
+  pos: startingPoint.slice(), //copy, shallow
   dir: "up",
+  color: [0.4, 0.6, 0, 1.0],
 };
 
+// init direction
 let isUp = false;
 let isDown = false;
 let isRight = false;
 let isLeft = false;
 
+// Road state
 const road = {
   y: 150,
   height: 230,
+  color: [0.3, 0.3, 0.3, 1],
 };
 
 const laneCount = 5;
@@ -59,7 +67,7 @@ const carColors = [
   [1, 0.5, 0, 1], // Orange
   [0.5, 1, 0, 1], // Lime Green
   //exta if having 2 cars per lane
-  [0.6, 0.6, 0.6, 1], // Silver 
+  [0.6, 0.6, 0.6, 1], // Silver
   [0, 0.5, 0, 1], // Green
 ];
 
@@ -67,7 +75,7 @@ const cars = [];
 let colorIndex = 0;
 
 lanes.forEach((y, i) => {
-  const carsInLane = (i + 1) % 2 === 0 ? 1 : 2;
+  const carsInLane = i % 2 === 0 ? 2 : 1;
 
   for (let j = 0; j < carsInLane; j++) {
     cars.push({
@@ -87,57 +95,43 @@ lanes.forEach((y, i) => {
 let score = 0;
 let roadSide = "A";
 
-// 5. Drawing functions
+// Drawing functions
 function drawRect(x, y, w, h, color) {
-  gl.bufferData(
-    gl.ARRAY_BUFFER,
-    new Float32Array([
-      x,
-      y,
-      x + w,
-      y,
-      x,
-      y + h,
-      x,
-      y + h,
-      x + w,
-      y,
-      x + w,
-      y + h,
-    ]),
-    gl.STATIC_DRAW
-  );
+  const topLeft = vec2(x, y);
+  const topRight = vec2(x + w, y);
+  const bottomLeft = vec2(x, y + h);
+  const bottomRight = vec2(x + w, y + h);
+  var vertices = [
+    topLeft,
+    topRight,
+    bottomLeft,
+    bottomLeft,
+    topRight,
+    bottomRight,
+  ];
+  gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
   gl.uniform4fv(colorLoc, color);
   gl.drawArrays(gl.TRIANGLES, 0, 6);
 }
 
 function drawFrog() {
-  let verts;
+  let vertices;
+  const topLeft = frog.pos;
+  const topRight = add(frog.pos, vec2(frogSize, 0));
+  const bottomLeft = add(frog.pos, vec2(0, frogSize));
+  const bottomRight = add(frog.pos, vec2(frogSize, frogSize));
+
   if (frog.dir === "up") {
-    verts = [
-      frog.x,
-      frog.y + frogSize,
-      frog.x + frogSize / 2,
-      frog.y,
-      frog.x + frogSize,
-      frog.y + frogSize,
-    ];
+    vertices = [bottomLeft, mix(topRight, topLeft, 0.5), bottomRight];
   } else {
-    verts = [
-      frog.x,
-      frog.y,
-      frog.x + frogSize / 2,
-      frog.y + frogSize,
-      frog.x + frogSize,
-      frog.y,
-    ];
+    vertices = [topLeft, topRight, mix(bottomLeft, bottomRight, 0.5)];
   }
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verts), gl.STATIC_DRAW);
-  gl.uniform4fv(colorLoc, [0.4, 0.6, 0., 1.0]); // frog color 0.1, 0.4, 0.3, 1.0
+  gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
+  gl.uniform4fv(colorLoc, frog.color);
   gl.drawArrays(gl.TRIANGLES, 0, 3);
 }
 
-// 6. Main drawing
+// Main drawing
 function drawScene() {
   gl.clear(gl.COLOR_BUFFER_BIT);
   gl.useProgram(program);
@@ -147,26 +141,25 @@ function drawScene() {
   gl.uniform2f(resLoc, canvas.width, canvas.height);
 
   // Pavement
-  drawRect(0, 0, canvas.width, road.y, [0.9, 0.9, 0.9, 1.0]); //[0.7, 0.8, 0.7, 1.0]
+  drawRect(0, 0, canvas.width, road.y, pavementColor);
   drawRect(
     0,
     road.y + road.height,
     canvas.width,
     canvas.height - (road.y + road.height),
-    [0.9, 0.9, 0.9, 1.0]
+    pavementColor
   );
-
   // Road
-  drawRect(0, road.y, canvas.width, road.height, [0.3, 0.3, 0.3, 1]);
+  drawRect(0, road.y, canvas.width, road.height, road.color);
   // Cars
   cars.forEach((c) => drawRect(c.x, c.y, c.width, c.height, c.color));
   // Frog
   drawFrog();
-  // Score bars (green)
+  // Score bars
   let j = 25;
   for (let i = 0; i < 10; i++) {
     if (i < score) {
-      drawRect(j, 25, 5, 40, [0.4, 0.6, 0., 1.0]); //filled bars
+      drawRect(j, 25, 5, 40, [0.4, 0.6, 0, 1.0]); //filled bars
     } else {
       drawRect(j, 25, 5, 40, [0.8, 0.8, 0.8, 1]); //empty bars
     }
@@ -174,7 +167,7 @@ function drawScene() {
   }
 }
 
-// 7. Game update
+// Game update
 function update() {
   if (score >= 10) {
     resetGame("winner");
@@ -191,18 +184,18 @@ function update() {
 
   for (const c of cars) {
     if (
-      frog.x < c.x + c.width &&
-      frog.x + frogSize > c.x &&
-      frog.y < c.y + c.height &&
-      frog.y + frogSize > c.y
+      frog.pos[0] < c.x + c.width &&
+      frog.pos[0] + frogSize > c.x &&
+      frog.pos[1] < c.y + c.height &&
+      frog.pos[1] + frogSize > c.y
     ) {
       resetGame("collision");
       break;
     }
   }
 
-  const frogTop = frog.y;
-  const frogBot = frog.y + frogSize;
+  const frogTop = frog.pos[1];
+  const frogBot = frog.pos[1] + frogSize;
   const roadTop = road.y;
   const roadBot = road.y + road.height;
   const above = frogBot < roadTop;
@@ -210,23 +203,23 @@ function update() {
 
   const step = 20;
   if (isUp) {
-    frog.y -= step;
+    frog.pos[1] -= step;
     frog.dir = "up";
   }
   if (isDown) {
-    frog.y += step;
+    frog.pos[1] += step;
     frog.dir = "down";
   }
   if (isRight) {
-    frog.x += step;
+    frog.pos[0] += step;
   }
   if (isLeft) {
-    frog.x -= step;
+    frog.pos[0] -= step;
   }
   isUp = isDown = isRight = isLeft = false;
 
-  frog.x = Math.max(0, Math.min(canvas.width - frogSize, frog.x));
-  frog.y = Math.max(0, Math.min(canvas.height - frogSize, frog.y));
+  frog.pos[0] = Math.max(0, Math.min(canvas.width - frogSize, frog.pos[0]));
+  frog.pos[1] = Math.max(0, Math.min(canvas.height - frogSize, frog.pos[1]));
 
   if (roadSide === "A" && above) {
     score++;
@@ -241,7 +234,7 @@ function update() {
   requestAnimationFrame(update);
 }
 
-// 8. Reset game
+// Reset game
 function resetGame(reason = "reset") {
   if (reason === "winner") {
     alert(
@@ -252,9 +245,7 @@ function resetGame(reason = "reset") {
       `Ónei bíll keyrði á Fríðu frosk!\nÞú fékkst ${score} stig.\nÝttu á OK til að prófa aftur.`
     );
   }
-
-  frog.x = canvas.width / 2 - frogSize / 2;
-  frog.y = canvas.height - 40;
+  frog.pos = startingPoint.slice();
   score = 0;
   scoreDisplay.textContent = `Stig: ${score}`;
   roadSide = "A";
@@ -262,7 +253,7 @@ function resetGame(reason = "reset") {
   isUp = isDown = isRight = isLeft = false;
 }
 
-// 9. Keyboard control
+// Keyboard control
 document.addEventListener("keydown", (e) => {
   if (e.key === "ArrowUp") {
     isUp = true;
@@ -290,6 +281,6 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-// 10. Start loop
+// Start loop
 drawScene();
 requestAnimationFrame(update);
