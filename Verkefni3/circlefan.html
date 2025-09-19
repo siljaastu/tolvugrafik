@@ -1,41 +1,36 @@
 <!DOCTYPE html>
 <html>
+  <script id="vertex-shader" type="x-shader/x-vertex">
+    uniform float time;
+    attribute vec4 vPosition;
 
+    void main()
+    {
+        vec4 pos = vPosition;
+        pos.y *= 0.5 * sin(0.003*time) + 1.5;
 
-<script id="vertex-shader" type="x-shader/x-vertex">
+        gl_Position = pos;
+    }
+  </script>
 
-uniform float time;
-attribute vec4 vPosition;
+  <script id="fragment-shader" type="x-shader/x-fragment">
 
-void main()
-{
-    vec4 pos = vPosition;
-    
-    float stretch = 0.2 * sin(0.005 * time + 6.0 * pos.x);
-    pos.y += stretch;
-    
-    gl_Position = pos;
-}
-</script>
+    precision mediump float;
 
-<script id="fragment-shader" type="x-shader/x-fragment">
+    void main()
+    {
+        gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );
+    }
+  </script>
 
-precision mediump float;
+  <script type="text/javascript" src="../Common/webgl-utils.js"></script>
+  <script type="text/javascript" src="../Common/initShaders.js"></script>
+  <script type="text/javascript" src="../Common/MV.js"></script>
+  <script type="text/javascript" src="circlefan.js"></script>
 
-void main()
-{
-    gl_FragColor = vec4( 1.0, 0.0, 0.0, 1.0 );
-}
-</script>
-
-<script type="text/javascript" src="../Common/webgl-utils.js"></script>
-<script type="text/javascript" src="../Common/initShaders.js"></script>
-<script type="text/javascript" src="../Common/MV.js"></script>
-<script type="text/javascript" src="circlefan.js"></script>
-
-<body>
-<canvas id="gl-canvas" width="512" height="512">>
-Oops ... your browser doesn't support the HTML5 canvas element
-</canvas>
-</body>
+  <body>
+    <canvas id="gl-canvas" width="512" height="512"
+      >> Oops ... your browser doesn't support the HTML5 canvas element
+    </canvas>
+  </body>
 </html>
