@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+<title>Rignandi punktar</title>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+uniform float time;
+attribute vec4 vPosition;
+varying vec4 fColor;
+
+void main()
+{
+    //Hlutföll og litir ísl. fánans fengnir af Wikipedia þjóðfánans
+
+	gl_PointSize = 3.0;
+    vec4 tpos = vPosition;
+
+    tpos.y = 1.0 - mod(0.001*time + tpos.y+1.0, 2.0);
+
+    if (tpos.y < 0.056 && tpos.y > -0.056) {
+        fColor = vec4(0.8627450980392157, 0.11764705882352941, 0.20784313725490197, 1.0);
+         } else if (tpos.x < -0.1 && tpos.x > -0.18) { //rauður
+        fColor = vec4(0.8627450980392157, 0.11764705882352941, 0.20784313725490197, 1.0);
+
+    } else if (tpos.y < 0.11 && tpos.y > -0.11) { //hvítur lárétt
+        fColor = vec4(1.0, 1.0, 1.0, 1.0);
+
+    } else if (tpos.x < -0.06 && tpos.x > -0.22) { //hvítur lóðrétt
+        fColor = vec4(1.0, 1.0, 1.0, 1.0);
+    } else {fColor = vec4(0.00784313725490196, 0.3215686274509804, 0.611764705882353, 1.0);}
+    
+
+    gl_Position = tpos;
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+varying vec4 fColor;
+
+void main()
+{
+    gl_FragColor = fColor;
+}
+</script>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="rainingPoints.js"></script>
+</head>
+
+<body>
+<canvas id="gl-canvas" width="750" height="540">
+</body>
+</html>
