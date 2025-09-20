@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Breakout</title>
+    <script type="text/javascript" src="../Common/webgl-utils.js"></script>
+    <script type="text/javascript" src="../Common/initShaders.js"></script>
+    <script type="text/javascript" src="../Common/MV.js"></script>
+    <script type="text/javascript" src="breakout.js"></script>
+</head>
+<body>
+<canvas id="gl-canvas" width="1000" height="600"></canvas>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+attribute vec4 vPosition;
+uniform vec2 boxPos;
+
+void main()
+{
+    gl_Position = vPosition + vec4(boxPos, 0.0, 0.0);
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+
+uniform vec4 color; 
+
+void main()
+{
+    gl_FragColor = color;
+}
+</script>
+
+</body>
+</html>
