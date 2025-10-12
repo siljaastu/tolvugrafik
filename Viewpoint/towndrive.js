@@ -6,7 +6,6 @@
 var canvas;
 var gl;
 
-// Globals (modernized)
 const COLORS = [
   vec4(0.1, 0.1, 0.8, 1.0),
   vec4(0.9, 0.2, 0.3, 1.0),
@@ -18,7 +17,7 @@ const COLORS = [
   vec4(0.0, 0.0, 0.0, 1.0),
   vec4(1.0, 0.0, 0.0, 1.0),
   vec4(0.0, 0.0, 1.0, 1.0),
-  vec4(0.45, 0.3, 0.2, 1.0)
+  vec4(0.45, 0.3, 0.2, 1.0),
 ];
 
 const LOWBLUE = COLORS[0];
@@ -133,6 +132,7 @@ window.onload = function init() {
 
   const program = initShaders(gl, "vertex-shader", "fragment-shader");
   gl.useProgram(program);
+  
   // build tracks
   tVertices = [];
   t2Vertices = [];
@@ -260,8 +260,16 @@ function createSecondTrack() {
   let theta = 0.0;
   t2Vertices = [];
   for (let i = 0; i <= TRACK2_PTS; i++) {
-    const p1 = vec3(TRACK2_OUTER * Math.cos(radians(theta)), TRACK2_OUTER * Math.sin(radians(theta)), 0.0);
-    const p2 = vec3(TRACK2_INNER * Math.cos(radians(theta)), TRACK2_INNER * Math.sin(radians(theta)), 0.0);
+    const p1 = vec3(
+      TRACK2_OUTER * Math.cos(radians(theta)),
+      TRACK2_OUTER * Math.sin(radians(theta)),
+      0.0
+    );
+    const p2 = vec3(
+      TRACK2_INNER * Math.cos(radians(theta)),
+      TRACK2_INNER * Math.sin(radians(theta)),
+      0.0
+    );
     t2Vertices.push(p1, p2);
     theta += 360.0 / TRACK2_PTS;
   }
@@ -337,13 +345,19 @@ function houseRoof(mv, sx, sy, sz, color) {
   const peakInset = Math.max(0.02, roofThickness * 0.25);
 
   let left = mv;
-  left = mult(left, translate(0.0, sy * 0.25 + eaveExtend * 0.5, roofZ - peakInset));
+  left = mult(
+    left,
+    translate(0.0, sy * 0.25 + eaveExtend * 0.5, roofZ - peakInset)
+  );
   left = mult(left, rotateX(-24.0));
   left = mult(left, scalem(plateX, plateY, roofThickness));
   drawBox(left, 1.0, 1.0, 1.0, BLACK);
 
   let right = mv;
-  right = mult(right, translate(0.0, -sy * 0.25 - eaveExtend * 0.5, roofZ - peakInset));
+  right = mult(
+    right,
+    translate(0.0, -sy * 0.25 - eaveExtend * 0.5, roofZ - peakInset)
+  );
   right = mult(right, rotateX(24.0));
   right = mult(right, scalem(plateX, plateY, roofThickness));
   drawBox(right, 1.0, 1.0, 1.0, BLACK);
@@ -371,7 +385,6 @@ function drawHouse(type, mv, x, y, rotDeg, sx, sy, sz, colorIndexOrColor) {
   else houseRoof(base, sx, sy, sz, color);
 }
 
-
 function drawTown(vm) {
   const placements = [
     [-20.0, 50.0, 6.0, 1, 0],
@@ -386,7 +399,9 @@ function drawTown(vm) {
 
   for (let i = 0; i < placements.length; ++i) {
     const p = placements[i];
-    const x = p[0], y = p[1], h = p[2];
+    const x = p[0],
+      y = p[1],
+      h = p[2];
     const type = p[3] === 1 ? 1 : 0;
     const colorIndex = p[4] !== undefined ? p[4] : i % COLORS.length;
     const sx = Math.max(4.0, h * 1.2);
@@ -412,30 +427,35 @@ function drawScenery(mv) {
   drawBridge(
     mv,
     -100.0, //cx
-    19.0,   //cy
-    40.0,   //open width
-    15.0,   //depth of top
-    20.0,   //totalHeight
-    1.8,    //thickness
+    19.0, //cy
+    40.0, //open width
+    15.0, //depth of top
+    20.0, //totalHeight
+    1.8, //thickness
     COLORS[10] //color
   );
   drawTown(mv);
 }
 
 function drawCar(mv, color) {
-  mv = mult(mv, scalem(CAR_SCALE, CAR_SCALE, CAR_SCALE));
-  color = color || BLUE;
-  gl.uniform4fv(colorLoc, color);
+  const model = mult(mv, scalem(CAR_SCALE, CAR_SCALE, CAR_SCALE));
+  const carColor = color || BLUE;
+
+  gl.uniform4fv(colorLoc, carColor);
   gl.bindBuffer(gl.ARRAY_BUFFER, cubeBuffer);
   gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
 
-  var mvBody = mult(mv, scalem(10.0, 3.0, 2.0));
-  mvBody = mult(mvBody, translate(0.0, 0.0, 0.5));
+  const mvBody = mult(
+    mult(model, scalem(10.0, 3.0, 2.0)),
+    translate(0.0, 0.0, 0.5)
+  );
   gl.uniformMatrix4fv(mvLoc, false, flatten(mvBody));
   gl.drawArrays(gl.TRIANGLES, 0, numCubeVertices);
 
-  var mvTop = mult(mv, scalem(4.0, 3.0, 2.0));
-  mvTop = mult(mvTop, translate(-0.2, 0.0, 1.5));
+  const mvTop = mult(
+    mult(model, scalem(4.0, 3.0, 2.0)),
+    translate(-0.2, 0.0, 1.5)
+  );
   gl.uniformMatrix4fv(mvLoc, false, flatten(mvTop));
   gl.drawArrays(gl.TRIANGLES, 0, numCubeVertices);
 }
@@ -490,7 +510,6 @@ function drawAirplane(mv) {
   gl.uniformMatrix4fv(mvLoc, false, flatten(tail));
   gl.drawArrays(gl.TRIANGLES, 0, numCubeVertices);
 }
-
 function render() {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -506,15 +525,15 @@ function render() {
   carXPos2 = TRACK2_RADIUS * Math.sin(radians(carDirection2));
   carYPos2 = TRACK2_RADIUS * Math.cos(radians(carDirection2));
 
-  function drawCarAt(vm, x, y, dirDeg, color) {
-    var local = vm;
+  const drawCarAt = (vm, x, y, dirDeg, color) => {
+    let local = vm;
     local = mult(local, translate(x, y, 0.1 * CAR_SCALE));
     local = mult(local, rotateZ(-dirDeg));
     drawCar(local, color);
-  }
+  };
 
-  var mv = mat4();
-  var viewMatrix;
+  let mv = mat4();
+  let viewMatrix;
 
   switch (view) {
     case 0:
@@ -568,17 +587,20 @@ function render() {
         vec3(0.0, 0.0, 1.0)
       );
       viewMatrix = mv;
-      var mvScenery = mult(viewMatrix, rotateZ(carDirection));
-      mvScenery = mult(mvScenery, translate(-carXPos, -carYPos, 0.0));
-      drawScenery(mvScenery);
-      drawCarAt(mvScenery, carXPos, carYPos, carDirection, CAR_COLOR1);
-      drawCarAt(mvScenery, carXPos2, carYPos2, carDirection2, CAR_COLOR2);
+      {
+        const mvScenery = mult(
+          mult(viewMatrix, rotateZ(carDirection)),
+          translate(-carXPos, -carYPos, 0.0)
+        );
+        drawScenery(mvScenery);
+        drawCarAt(mvScenery, carXPos, carYPos, carDirection, CAR_COLOR1);
+        drawCarAt(mvScenery, carXPos2, carYPos2, carDirection2, CAR_COLOR2);
+      }
       break;
 
     case 5:
-      mv = rotateY(-carDirection);
       mv = mult(
-        mv,
+        rotateY(-carDirection),
         lookAt(
           vec3(3.0, 0.0, 5.0 + height),
           vec3(40.0 - carXPos, 120.0 - carYPos, 0.0),
@@ -586,11 +608,15 @@ function render() {
         )
       );
       viewMatrix = mv;
-      var mvScenery5 = mult(viewMatrix, rotateZ(carDirection));
-      mvScenery5 = mult(mvScenery5, translate(-carXPos, -carYPos, 0.0));
-      drawScenery(mvScenery5);
-      drawCarAt(mvScenery5, carXPos, carYPos, carDirection, CAR_COLOR1);
-      drawCarAt(mvScenery5, carXPos2, carYPos2, carDirection2, CAR_COLOR2);
+      {
+        const mvScenery5 = mult(
+          viewMatrix,
+          mult(rotateZ(carDirection), translate(-carXPos, -carYPos, 0.0))
+        );
+        drawScenery(mvScenery5);
+        drawCarAt(mvScenery5, carXPos, carYPos, carDirection, CAR_COLOR1);
+        drawCarAt(mvScenery5, carXPos2, carYPos2, carDirection2, CAR_COLOR2);
+      }
       break;
 
     case 6:
@@ -600,11 +626,15 @@ function render() {
         vec3(0.0, 0.0, 1.0)
       );
       viewMatrix = mv;
-      var mvScenery6 = mult(viewMatrix, rotateZ(carDirection));
-      mvScenery6 = mult(mvScenery6, translate(-carXPos, -carYPos, 0.0));
-      drawScenery(mvScenery6);
-      drawCarAt(mvScenery6, carXPos, carYPos, carDirection, CAR_COLOR1);
-      drawCarAt(mvScenery6, carXPos2, carYPos2, carDirection2, CAR_COLOR2);
+      {
+        const mvScenery6 = mult(
+          viewMatrix,
+          mult(rotateZ(carDirection), translate(-carXPos, -carYPos, 0.0))
+        );
+        drawScenery(mvScenery6);
+        drawCarAt(mvScenery6, carXPos, carYPos, carDirection, CAR_COLOR1);
+        drawCarAt(mvScenery6, carXPos2, carYPos2, carDirection2, CAR_COLOR2);
+      }
       break;
 
     case 7:
@@ -614,11 +644,15 @@ function render() {
         vec3(0.0, 0.0, 1.0)
       );
       viewMatrix = mv;
-      var mvScenery7 = mult(viewMatrix, rotateZ(carDirection));
-      mvScenery7 = mult(mvScenery7, translate(-carXPos, -carYPos, 0.0));
-      drawScenery(mvScenery7);
-      drawCarAt(mvScenery7, carXPos, carYPos, carDirection, CAR_COLOR1);
-      drawCarAt(mvScenery7, carXPos2, carYPos2, carDirection2, CAR_COLOR2);
+      {
+        const mvScenery7 = mult(
+          viewMatrix,
+          mult(rotateZ(carDirection), translate(-carXPos, -carYPos, 0.0))
+        );
+        drawScenery(mvScenery7);
+        drawCarAt(mvScenery7, carXPos, carYPos, carDirection, CAR_COLOR1);
+        drawCarAt(mvScenery7, carXPos2, carYPos2, carDirection2, CAR_COLOR2);
+      }
       break;
 
     case 8:
@@ -628,11 +662,15 @@ function render() {
         vec3(0.0, 0.0, 1.0)
       );
       viewMatrix = mv;
-      var mvScenery8 = mult(viewMatrix, rotateZ(carDirection));
-      mvScenery8 = mult(mvScenery8, translate(-carXPos, -carYPos, 0.0));
-      drawScenery(mvScenery8);
-      drawCarAt(mvScenery8, carXPos, carYPos, carDirection, CAR_COLOR1);
-      drawCarAt(mvScenery8, carXPos2, carYPos2, carDirection2, CAR_COLOR2);
+      {
+        const mvScenery8 = mult(
+          viewMatrix,
+          mult(rotateZ(carDirection), translate(-carXPos, -carYPos, 0.0))
+        );
+        drawScenery(mvScenery8);
+        drawCarAt(mvScenery8, carXPos, carYPos, carDirection, CAR_COLOR1);
+        drawCarAt(mvScenery8, carXPos2, carYPos2, carDirection2, CAR_COLOR2);
+      }
       break;
   }
 
@@ -644,10 +682,9 @@ function updateAirplane() {
   airplane.t += 0.01;
   if (airplane.t > 2 * Math.PI) airplane.t -= 2 * Math.PI;
 }
-
 function getWalkingView() {
-  var moveSpeed = 1.0;
-  var turnSpeed = 0.03;
+  const moveSpeed = 1.0;
+  const turnSpeed = 0.03;
 
   if (keyState["w"]) {
     walkCam.x += moveSpeed * Math.cos(walkCam.yaw);
@@ -660,13 +697,13 @@ function getWalkingView() {
   if (keyState["a"]) walkCam.yaw += turnSpeed;
   if (keyState["d"]) walkCam.yaw -= turnSpeed;
 
-  var eye = vec3(walkCam.x, walkCam.y, 4.0 + height);
-  var at = vec3(
+  const eye = vec3(walkCam.x, walkCam.y, 4.0 + height);
+  const at = vec3(
     walkCam.x + Math.cos(walkCam.yaw),
     walkCam.y + Math.sin(walkCam.yaw),
     4.0 + height
   );
-  var up = vec3(0, 0, 1);
+  const up = vec3(0, 0, 1);
 
   return lookAt(eye, at, up);
 }
