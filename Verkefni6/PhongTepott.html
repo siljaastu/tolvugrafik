@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Phong / Blinn-Phong Tepottur</title>
+    <style>
+        body { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; background:#eefafc; }
+        #controls { margin-top: 8px; }
+        canvas { border: 1px solid #999; }
+    </style>
+</head>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+attribute vec4 vPosition;
+attribute vec4 vNormal;
+varying vec3 N, L, E;
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+uniform vec4 lightPosition;
+uniform mat3 normalMatrix;
+
+void main()
+{
+    vec3 pos = (modelViewMatrix * vPosition).xyz;
+
+    // check for directional light
+    if (lightPosition.w == 0.0) L = normalize(lightPosition.xyz);
+    else L = normalize( lightPosition.xyz - pos );
+
+    E = -normalize(pos);
+    N = normalize(normalMatrix * vNormal.xyz);
+
+    gl_Position = projectionMatrix * modelViewMatrix * vPosition;
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+
+uniform vec4 ambientProduct;
+uniform vec4 diffuseProduct;
+uniform vec4 specularProduct;
+uniform float shininess;
+uniform int uUseBlinn; // 1 = Blinn, 0 = Phong
+varying vec3 N, L, E;
+
+void main()
+{
+    vec3 nN = normalize(N);
+    vec3 nL = normalize(L);
+    vec3 nE = normalize(E);
+
+    vec4 ambient = ambientProduct;
+    float Kd = max(dot(nL, nN), 0.0);
+    vec4 diffuse = Kd * diffuseProduct;
+
+    vec4 specular = vec4(0.0);
+
+    if (uUseBlinn == 1) {
+        // Blinn-Phong (half-vector)
+        vec3 H = normalize(nL + nE);
+        float Ks = pow(max(dot(nN, H), 0.0), shininess);
+        specular = Ks * specularProduct;
+    } else {
+        // Phong (reflection vector)
+        vec3 R = 2.0 * max(dot(nL, nN), 0.0) * nN - nL;
+        float Ks = pow(max(dot(nE, R), 0.0), shininess);
+        specular = Ks * specularProduct;
+    }
+
+    if (dot(nL, nN) < 0.0) specular = vec4(0.0, 0.0, 0.0, 1.0);
+
+    vec4 fColor = ambient + diffuse + specular;
+    fColor.a = 1.0;
+    gl_FragColor = fColor;
+}
+</script>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="teapotData.js"></script>
+<script type="text/javascript" src="PhongTepott.js"></script>
+
+<body>
+    <div id="controls">
+        <label style="margin-left:12px">Núverandi endurskinslíkan:  <span id="modeLabel">Blinn-Phong</span></label>
+        <button id="toggleBtn">Phong</button>
+    </div>
+
+    <canvas id="gl-canvas" width="600" height="600"></canvas>
+</body>
+</html>
