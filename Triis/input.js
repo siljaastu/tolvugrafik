@@ -50,18 +50,16 @@ function handleKeyDown(event) {
     case "Space":
       dropBlock(activeBlock);
       break;
-    // For testing
-    case "Digit1":
-      removeLevels(levels, [0]);
-      break;
-    case "Digit2":
-      removeLevels(levels, [1]);
-      break;
-    case "Digit3":
-      removeLevels(levels, [2]);
-      break;
-    case "Enter":
-      break;
+    // // For testing
+    // case "Digit1":
+    //   removeLevels(levels, [0]);
+    //   break;
+    // case "Digit2":
+    //   removeLevels(levels, [1]);
+    //   break;
+    // case "Digit3":
+    //   removeLevels(levels, [2]);
+    //   break;
   }
 
   console.log(event.code);

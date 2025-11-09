@@ -19,10 +19,6 @@ grid.position.set(0, -10, 0);
 scene.add(grid);
 window.allGrids.push(grid);
 
-// // Grid í miðju spilaboxi (for debugging)
-// const midGrid = new THREE.GridHelper(6, 6);
-// scene.add(midGrid);
-
 // // Grid í vinstri hlið neðst
 // const wallGrid = new THREE.GridHelper(6, 6, boxColor, boxColor);
 // wallGrid.rotation.z = Math.PI / 2;

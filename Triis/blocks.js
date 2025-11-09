@@ -1,61 +1,40 @@
-// import { cubeSize } from "./consts";
-
-// /* A basic cube used to create any block */
-// function createCube(pos, size, color) {
-//   const geometry = new THREE.BoxGeometry(size, size, size);
-//   const material = new THREE.MeshPhongMaterial({ color: color });
-//   const edgeMat = new THREE.LineBasicMaterial({
-//   color: 0xffffff,
-//   depthTest: true,
-// });
-// const cube = new THREE.LineSegments(
-//   new THREE.EdgesGeometry(geometry),
-//   edgeMat
-// );
-// //   const cube = new THREE.Mesh(geometry, material);
-//   cube.position.set(
-//     pos.x,
-//     pos.y,
-//     pos.z
-//   );
-//   return cube;
-// }
-
+// Create a new cube that is later linked to a larger block
 function createCube(pos, size, color) {
   const geometry = new THREE.BoxGeometry(size, size, size);
-  
+
   // Create the solid cube
   const material = new THREE.MeshPhongMaterial({ color: color });
   const solidCube = new THREE.Mesh(geometry, material);
-  
+
   // Create the wireframe edges
   const edgeMat = new THREE.LineBasicMaterial({
-    color: color*0.0001, //dekkja valinn lit fyrir línur
+    color: color * 0.0001, //dekkja valinn lit fyrir línur
     depthTest: true,
   });
   const wireframe = new THREE.LineSegments(
     new THREE.EdgesGeometry(geometry),
     edgeMat
   );
-  
+
   // Create a group to hold both
   const cubeGroup = new THREE.Group();
   cubeGroup.add(solidCube);
   cubeGroup.add(wireframe);
-  
+
   // Set the position of the entire group
   cubeGroup.position.set(pos.x, pos.y, pos.z);
-  
+
   return cubeGroup;
 }
 
+// Create a straight block with three cubes
 function createStraightBlock(pos) {
   const color = getRandomColor();
 
   var cubes = [
-    createCube({x: 0, y: cubeSize, z: 0}, cubeSize, color),    // Top cube
-    createCube({x: 0, y: 0, z: 0}, cubeSize, color),          // Middle cube  
-    createCube({x: 0, y: -cubeSize, z: 0}, cubeSize, color),  // Bottom cube
+    createCube({ x: 0, y: cubeSize, z: 0 }, cubeSize, color), // Top cube
+    createCube({ x: 0, y: 0, z: 0 }, cubeSize, color), // Middle cube
+    createCube({ x: 0, y: -cubeSize, z: 0 }, cubeSize, color), // Bottom cube
   ];
 
   var block = new THREE.Group();
@@ -67,13 +46,14 @@ function createStraightBlock(pos) {
   return block;
 }
 
+// Create an L-shaped block with three cubes
 function createLBlock(pos) {
   const color = getRandomColor();
 
   var cubes = [
-    createCube({x: 0, y: cubeSize, z: 0}, cubeSize, color),    // Top cube
-    createCube({x: 0, y: 0, z: 0}, cubeSize, color),          // Middle/bottom cube  
-    createCube({x: cubeSize, y: 0, z: 0}, cubeSize, color),  // Bottom/Out cube
+    createCube({ x: 0, y: cubeSize, z: 0 }, cubeSize, color), // Top cube
+    createCube({ x: 0, y: 0, z: 0 }, cubeSize, color), // Middle/bottom cube
+    createCube({ x: cubeSize, y: 0, z: 0 }, cubeSize, color), // Bottom/Out cube
   ];
 
   var block = new THREE.Group();
@@ -85,7 +65,7 @@ function createLBlock(pos) {
   return block;
 }
 
-/* Creates and returns a random color hex code */
+// Creates and returns a random color hex code
 function getRandomColor() {
   var letters = "0123456789ABCDEF";
   var color = "#";
@@ -97,16 +77,17 @@ function getRandomColor() {
 
 // Get the YXZ index coordinate for a cube in the "levels" state
 function getYXZ(cube) {
-  var yxz = {};
   const pos = cube.getWorldPosition(new THREE.Vector3());
 
-  yxz.y = Math.floor(pos.y + HEIGHT / 2.0);
-  yxz.x = Math.floor(pos.x + WIDTH / 2.0);
-  yxz.z = Math.floor(pos.z + WIDTH / 2.0);
-
-  return yxz;
+  return {
+    y: Math.floor(pos.y + HEIGHT / 2.0),
+    x: Math.floor(pos.x + WIDTH / 2.0),
+    z: Math.floor(pos.z + WIDTH / 2.0),
+  };
 }
 
+// Check if the current position of "block" is legal
+// (does it collide with another block or is it outside the playfield?)
 function isLegalPosition(block) {
   var isLegal = true;
 
@@ -123,7 +104,7 @@ function isLegalPosition(block) {
   return isLegal;
 }
 
-// Check if the space directly below is occupied
+// Check if the space directly below a block is occupied
 function isSpaceBelow(block) {
   var spaceBelow = true;
 
@@ -136,7 +117,7 @@ function isSpaceBelow(block) {
   return spaceBelow;
 }
 
-// Check if the active block's current position collides
+// Check if the block's current position collides
 // with any other currently placed block
 function checkCollision(block) {
   for (const cube of block.children) {
@@ -149,7 +130,7 @@ function checkCollision(block) {
   return false;
 }
 
-// Rotate the active block by the given rotation
+// Rotate a block by the given rotation
 function rotateBlock(block, amountToRotate) {
   const prevRotation = block.rotation.clone();
 
@@ -162,7 +143,7 @@ function rotateBlock(block, amountToRotate) {
   }
 }
 
-// Move active block by (x, y, z)
+// Move a block by (x, y, z)
 function moveBlock(block, amountToMove) {
   // Remember old position to be able to roll back if we hit something
   const prevPos = block.position.clone();
@@ -170,12 +151,13 @@ function moveBlock(block, amountToMove) {
   // Update position
   block.position.add(amountToMove);
 
-  // If we're in an invalid position, just go back to where we were... 
+  // If we're in an invalid position, just go back to where we were...
   if (!isLegalPosition(block)) {
     block.position.copy(prevPos);
   }
 }
 
+// Drop a given block as far down as it can go
 function dropBlock(block) {
   let distanceToDrop = block.children
     .map((cube) => {
@@ -192,5 +174,4 @@ function dropBlock(block) {
     }, Number.MAX_VALUE);
 
   block.position.add(new THREE.Vector3(0, -distanceToDrop, 0));
-  // endOfRound();
 }

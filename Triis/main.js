@@ -89,7 +89,7 @@ function setScore(newScore) {
 
 // Detach single cubes from collective "block" and add them to the scene
 function detachCubes(block) {
-  const numCubes = block.children.length
+  const numCubes = block.children.length;
   var cubes = [];
 
   for (var i = 0; i < numCubes; i++) {
@@ -98,7 +98,7 @@ function detachCubes(block) {
     // Detach cube from the parent block
     const pos = cube.getWorldPosition(new THREE.Vector3());
     block.remove(cube);
-    
+
     // Cube is no longer positioned relative to the blocks center
     cube.position.copy(pos);
     cubes.push(cube);
@@ -114,12 +114,20 @@ function detachCubes(block) {
 
 // Update game state with current state of blocks at the end of the round
 function endOfRound() {
+  if (isGameOver()) {
+    clearInterval(intervalId);
+    alert(
+      "Leik lokið! Þú fékkst " + score + " stig. Ýttu á OK til að prófa aftur."
+    );
+    resetGame();
+    return;
+  }
+
   var filledLevels = [];
 
   const cubes = detachCubes(activeBlock);
 
   for (const cube of cubes) {
-    console.log(cube)
     const { y, x, z } = getYXZ(cube);
 
     if (y < HEIGHT) {
@@ -132,32 +140,12 @@ function endOfRound() {
     }
   }
 
-  // const numCubes = activeBlock.children.length
-  // for (var i = 0; i < numCubes; i++) {
-  //   const cube = activeBlock.children[0];
-
-  //   const pos = cube.getWorldPosition(new THREE.Vector3());
-  //   activeBlock.remove(cube);
-  //   cube.position.copy(pos);
-  //   scene.add(cube);
-  // }
-
-
   if (filledLevels.length > 0) {
     removeLevels(levels, filledLevels);
   }
-  if (!isGameOver()) {
-    newBlock();
-  } else {
-    clearInterval(intervalId);
-    alert(
-      "Leik lokið! Þú fékkst " + score + " stig. Ýttu á OK til að prófa aftur."
-    );
-    resetGame();
-  }
-}
 
-function stopGame() {}
+  newBlock();
+}
 
 function resetGame() {
   if (levels === undefined) {
@@ -199,7 +187,7 @@ function applyTheme(t) {
   theme = t;
   if (t === "light") {
     scene.background = new THREE.Color(0xffffff);
-    if (window.updateGridColor) window.updateGridColor(0x03c2fc); // litur í light
+    if (window.updateGridColor) window.updateGridColor(0x242973); // litur í light
   } else {
     scene.background = new THREE.Color(0x000000);
     if (window.updateGridColor) window.updateGridColor(0xffe70a); // litur í dark
@@ -226,19 +214,8 @@ if (themeButton) {
   });
 }
 
-// initialize visuals after applyTheme(theme) call
 applyTheme(theme);
 updateThemeButton(theme);
-
-// const themeButton = document.getElementById("toggle-theme");
-// if (themeButton) {
-//   themeButton.addEventListener("click", () => {
-//     applyTheme(theme === "dark" ? "light" : "dark");
-//   });
-// }
-
-// // Setja sjálfgefið
-// applyTheme(theme);
 
 // Skilgreina ljósgjafa og bæta honum í sviðsnetið
 const ambLight = new THREE.AmbientLight(0x404040); // soft white light

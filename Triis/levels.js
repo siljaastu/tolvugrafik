@@ -61,14 +61,14 @@ function dropLevelsAbove(levels, startLevel) {
         const cube = levels[y][x][z];
 
         if (cube !== undefined) {
-            console.log(cube.parent.rotation);
-            console.log(cube.position, cube.rotation);
-          
-            const block = cube.parent;
-        //     cube.rotation.x = -block.rotation.x;
-        //     cube.rotation.y = -block.rotation.y;
-        //    be.rotation.z = -block.rotation.z;
-            cube.position.add(new THREE.Vector3(0, -cubeSize, 0));
+          console.log(cube.parent.rotation);
+          console.log(cube.position, cube.rotation);
+
+          const block = cube.parent;
+          //     cube.rotation.x = -block.rotation.x;
+          //     cube.rotation.y = -block.rotation.y;
+          //    be.rotation.z = -block.rotation.z;
+          cube.position.add(new THREE.Vector3(0, -cubeSize, 0));
         }
       }
     }
