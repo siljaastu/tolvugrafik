@@ -48,7 +48,7 @@ function handleKeyDown(event) {
       rot.z = -Math.PI / 2.0;
       break;
     case "Space":
-      dropActiveBlock();
+      dropBlock(activeBlock);
       break;
     // For testing
     case "Digit1":
@@ -67,6 +67,6 @@ function handleKeyDown(event) {
   console.log(event.code);
   moveBlock(activeBlock, mov);
   if (rot) {
-    rotateBlock(activeBlock, );
+    rotateBlock(activeBlock, rot);
   }
 }

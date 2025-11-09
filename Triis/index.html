@@ -3,20 +3,93 @@
   <head>
     <meta charset="utf-8" />
     <title>TRÍIS!</title>
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        background: #07101a;
+        color: rgb(208, 225, 219);
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      #c {
+        width: 55%;
+        display: block;
+        margin: 0 auto;
+      }
+      #stig {
+        position: absolute;
+        left: 30px;
+        top: 30px;
+        background: rgba(2, 32, 44, 0.935);
+        padding: 8px 12px;
+        border-radius: 8px;
+        z-index: 10;
+        font-size: 25px;
+        color: inherit;
+      }
+
+      #ui {
+        position: absolute;
+        right: 30px;
+        top: 30px;
+        background: rgba(2, 32, 44, 0.935);
+        /* opacity: 0.5; */
+        padding: 8px 12px;
+        border-radius: 8px;
+        z-index: 10;
+      }
+      #ui b {
+        color: #c9c612;
+      }
+      .ui-button {
+        background: rgba(255, 255, 255, 0.06);
+        color: inherit;
+        padding: 6px 10px;
+        border-radius: 6px;
+        border: 1px solid rgba(255, 255, 255, 0.06);
+      }
+      .ui-button--dark {
+        background: rgba(255, 231, 10, 0.06);
+        color: #ffe70a;
+        border-color: rgba(255, 231, 10, 0.12);
+      }
+      .ui-button--light {
+        background: rgba(0, 0, 0, 0.06);
+        color: #ffffff;
+        border-color: rgba(0, 0, 0, 0.12);
+      }
+      /* #toggle-theme {
+        position: absolute;
+        top: 80px;
+        right: 80px;
+        z-index: 999;
+      } */
+    </style>
   </head>
   <body>
     <canvas id="c" width="800" height="800"></canvas>
-    <div>Stig: <span id="score">0</span></div>
-    <button
-      id="toggle-theme"
-      style="position: absolute; top: 80px; right: 80px; z-index: 999"
-    >
-      Skipta um þema
-    </button>
+    <div id="stig">
+      <div><b>Stig: </b> <span id="score">0</span></div>
+    </div>
+    <div id="ui">
+      <div style="font-size: 13px; opacity: 0.9">
+        <br />
+        <b>Svona spilar þú: </b>
+        <br />
+        Örvatakkar til að hreyfa kubb.<br />
+        a/z s/x d/c til að snúa kubbi.<br />
+        Bilstöng til að fella kubb.<br />
+        Notaðu músina til að snúa sjónarhorni.<br />
+        <br />
+      </div>
+      <div style="margin-top: 8px">
+        <button id="toggle-theme" class="ui-button">Skipta um þema</button>
+      </div>
+    </div>
 
     <script src="./lib/three.js"></script>
     <script src="./lib/OrbitControls.js"></script>
-    <script src="./consts.js"></script>
     <script src="./blocks.js"></script>
     <script src="./levels.js"></script>
     <script src="./input.js"></script>
