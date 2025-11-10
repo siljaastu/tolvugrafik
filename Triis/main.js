@@ -87,31 +87,6 @@ function setScore(newScore) {
   if (scoreDisplay) scoreDisplay.textContent = String(score);
 }
 
-// Detach single cubes from collective "block" and add them to the scene
-function detachCubes(block) {
-  const numCubes = block.children.length;
-  var cubes = [];
-
-  for (var i = 0; i < numCubes; i++) {
-    const cube = block.children[0];
-
-    // Detach cube from the parent block
-    const pos = cube.getWorldPosition(new THREE.Vector3());
-    block.remove(cube);
-
-    // Cube is no longer positioned relative to the blocks center
-    cube.position.copy(pos);
-    cubes.push(cube);
-
-    // Add single cube to scene
-    scene.add(cube);
-  }
-
-  scene.remove(block);
-
-  return cubes;
-}
-
 // Update game state with current state of blocks at the end of the round
 function endOfRound() {
   if (isGameOver()) {
@@ -125,9 +100,16 @@ function endOfRound() {
 
   var filledLevels = [];
 
+  // Detach cubes from the active block
   const cubes = detachCubes(activeBlock);
+  
+  // Remove the (now empty) block from our scene
+  scene.remove(activeBlock);
 
   for (const cube of cubes) {
+    // Add individual cube to the scene
+    scene.add(cube);
+
     const { y, x, z } = getYXZ(cube);
 
     if (y < HEIGHT) {

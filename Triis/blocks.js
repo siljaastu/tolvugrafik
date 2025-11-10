@@ -175,3 +175,24 @@ function dropBlock(block) {
 
   block.position.add(new THREE.Vector3(0, -distanceToDrop, 0));
 }
+
+// Detach single cubes from collective "block"
+// This leaves the "block" with no children
+function detachCubes(block) {
+  const numCubes = block.children.length;
+  var cubes = [];
+
+  for (var i = 0; i < numCubes; i++) {
+    const cube = block.children[0];
+
+    // Detach cube from the parent block
+    const pos = cube.getWorldPosition(new THREE.Vector3());
+    block.remove(cube);
+
+    // Cube is no longer positioned relative to the blocks center
+    cube.position.copy(pos);
+    cubes.push(cube);
+  }
+
+  return cubes;
+}
