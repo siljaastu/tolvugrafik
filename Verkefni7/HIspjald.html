@@ -1,0 +1,55 @@
+
+<!DOCTYPE html>
+<html>
+<style type="text/css">
+    canvas { background: blue; }
+</style>
+
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+
+attribute  vec4 vPosition;
+attribute  vec2 vTexCoord;
+
+varying vec2 fTexCoord;
+
+uniform mat4 projection;
+uniform mat4 modelview;
+
+void main()
+{
+    fTexCoord = vTexCoord;
+    gl_Position = projection * modelview * vPosition;
+}
+</script>
+
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+
+varying vec2 fTexCoord;
+uniform sampler2D texture;
+uniform vec3 uColorAdjust;
+
+void main()
+{
+    vec4 col = texture2D(texture, fTexCoord);
+    // bætum uColorAdjust við viðeigandi r/g/b hluta og notum clamp
+    col.r = clamp(col.r + uColorAdjust.r, 0.0, 1.0);
+    col.g = clamp(col.g + uColorAdjust.g, 0.0, 1.0);
+    col.b = clamp(col.b + uColorAdjust.b, 0.0, 1.0);
+    gl_FragColor = col;
+}
+</script>
+
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="HIspjald.js"></script>
+
+
+<body>
+<canvas id="gl-canvas" width="600" height="600">
+<img id = "texImage" src = "HI_Logo.jpg" hidden></img>
+</body>
+</html>
